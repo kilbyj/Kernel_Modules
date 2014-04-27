@@ -40,7 +40,7 @@ static int __init perf_init(void){
 	
 	if(alloc_chrdev_region(&first, 0, 1, "perf_counter") <0) return -1;
 	
-	if((cl == class_create(THIS_MODULE,"chardev"))==NULL){
+	if((cl = class_create(THIS_MODULE,"chardev"))==NULL){
 		unregister_chrdev_region(first,1);
 		return -1;
 	}
@@ -62,7 +62,7 @@ static int __init perf_init(void){
 	}
 
 	
-	asm("mrc p15, 0, %0, c15, c12, 0\t\n" : : "=r" (0x0007007));
+	asm("mrc p15, 0, %0, c15, c12, 0\t\n" : : "r" (0x0007007));
 	return 0;
 }
 

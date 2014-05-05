@@ -1,6 +1,6 @@
 #include <linux/module.h>
 #include <linux/device.h>
-#include <linux/fx.h>
+#include <linux/fs.h>
 #include <linux/cdev.h>
 
 #define PERF_DEF_OPTS (1 | 16) //this is where you set what you want the performance counters to read
@@ -12,7 +12,7 @@ static dev_t first;
 static struct cdev c_dev;
 static struct class *cl;
 
-static ssize_t perf_read(struct file *f, char __use *buf, size_t len, loff_t *off){
+static ssize_t perf_read(struct file *f, char __user *buf, size_t len, loff_t *off){
 
 	unsigned int cycles0,cycles1,cycles2;
 	pringk(KERN_INFO "perf_counter: read()\n");
@@ -95,7 +95,7 @@ static void __exit perf_exit(void){
 	cdev_del(&c_dev);
 	device_destroy(cl, first);
 	class_destroy(cl);
-	unregister_chrdev_region(first,1)
+	unregister_chrdev_region(first,1);
 	on_each_cpu(disable_cpu_counters), NULL, 1);
 	printk(KERN_INFO "perf_counter destroyed");
 

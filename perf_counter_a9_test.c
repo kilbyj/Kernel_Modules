@@ -3,7 +3,7 @@
 #include <linux/fx.h>
 #include <linux/cdev.h>
 
-#define PERF_DEF_OPTS (1 | 16)
+#define PERF_DEF_OPTS (1 | 16) //this is where you set what you want the performance counters to read
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Jonathan Kilby");
@@ -28,7 +28,25 @@ static ssize_t perf_read(struct file *f, char __use *buf, size_t len, loff_t *of
 	return 12;
 
 }
+static void enable_cpu_counters(void* data){
 
+	 /* Enable user-mode access to counters. */
+        asm volatile("mcr p15, 0, %0, c9, c14, 0" :: "r"(1));
+        /* Program PMU and enable all counters */
+        asm volatile("mcr p15, 0, %0, c9, c12, 0" :: "r"(PERF_DEF_OPTS));
+        asm volatile("mcr p15, 0, %0, c9, c12, 1" :: "r"(0x8000000f));
+
+}
+
+static void disable_cpu_counters(void *data){
+
+	  /* Enable user-mode access to counters. */
+        asm volatile("mcr p15, 0, %0, c9, c14, 0" :: "r"(0));
+        /* Program PMU and enable all counters */
+        //asm volatile("mcr p15, 0, %0, c9, c12, 0" :: "r"(PERF_DEF_OPTS));
+        //asm volatile("mcr p15, 0, %0, c9, c12, 1" :: "r"(0x8000000f));
+
+}
 static struct file_operations file_ops = {
 
 	.owner = THIS_MODULE,
@@ -38,7 +56,7 @@ static struct file_operations file_ops = {
 
 static int __init perf_init(void){
 
-	printk(KERN_INFO "perf_counter registered");
+//	printk(KERN_INFO "perf_counter registered");
 
 	if(alloc_chrdev_region(&first, 0, 1, "perf_counter") <0) return -1;
 
@@ -63,11 +81,8 @@ static int __init perf_init(void){
 
 	}
 
-	/*Enable user-mode access to counters. */
-	asm("mcr p15, 0, %0, c9, c14, 0\t\n" : : "r"(1)); //found this one a blog   http://neocontra.blogspot.com/2013/05/user-mode-performance-counters-for.html
-	/* Program PMU and enable all counters */
-	asm("mcr p15, 0, %0, c9, c12, 0" : : "r"(PERF_DEF_OPTS));
-	asm("mcr p15, 0, %0, c9, c12, 1" :: "r"(0x8000000f);
+	on_each_cpu(enable_cpu_counters, NULL, 1);
+	printk(KERN_INFO "perf_counter  registered");
 
 	return 0;
 }
@@ -81,6 +96,8 @@ static void __exit perf_exit(void){
 	device_destroy(cl, first);
 	class_destroy(cl);
 	unregister_chrdev_region(first,1)
+	on_each_cpu(disable_cpu_counters), NULL, 1);
+	printk(KERN_INFO "perf_counter destroyed");
 
 }
 

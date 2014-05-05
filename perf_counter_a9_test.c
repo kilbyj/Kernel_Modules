@@ -96,7 +96,7 @@ static void __exit perf_exit(void){
 	device_destroy(cl, first);
 	class_destroy(cl);
 	unregister_chrdev_region(first,1);
-	on_each_cpu(disable_cpu_counters), NULL, 1);
+	on_each_cpu(disable_cpu_counters, NULL, 1);
 	printk(KERN_INFO "perf_counter destroyed");
 
 }

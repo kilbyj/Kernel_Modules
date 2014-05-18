@@ -74,7 +74,7 @@ static void __exit perf_exit(void){
 	cdev_del(&c_dev);
 	device_destroy(cl, first);
 	class_destroy(cl);
-	unregister_chrdev_region(first,1)
+	unregister_chrdev_region(first,1);
 
 }
 

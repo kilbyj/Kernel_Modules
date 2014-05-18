@@ -29,7 +29,7 @@ main(){
     
     time = (float) (cycles/CLOCK_RATE);
     
-    mbps = (float) (N*2*sizeof(unsigned int)))/time/(1024.0*1024.0);
+    mbps = (float) ((N*2*sizeof(unsigned int)))/time/(1024.0*1024.0);
     
     us = time2.tv_sec*1000000 + time2.tv_usec - time1.tv_sec*1000000 - time1.tv_usec;
     

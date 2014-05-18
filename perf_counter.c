@@ -1,19 +1,19 @@
 #include <linux/module.h>
 #include <linux/device.h>
-#include <linux/fx.h>
+#include <linux/fs.h>
 #include <linux/cdev.h>
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Jonathan Kilby");
+MODULE_AUTHOR("Student");
 MODULE_DESCRIPTION("performance counter driver");
 static dev_t first;
 static struct cdev c_dev;
 static struct class *cl;
 
-static ssize_t perf_read(struct file *f, char __use *buf, size_t len, loff_t *off){
+static ssize_t perf_read(struct file *f, char __user *buf, size_t len, loff_t *off){
 
 	unsigned int cycles0,cycles1,cycles2;
-	pringk(KERN_INFO "perf_counter: read()\n");
+	printk(KERN_INFO "perf_counter: read()\n");
 
 	asm("mrc p15, 0, %0, c15, c12, 1\t\n" : "=r" (cycles0));
 	asm("mrc p15, 0, %0, c15, c12, 2\t\n" : "=r" (cycles1));
@@ -62,7 +62,7 @@ static int __init perf_init(void){
 	}
 
 	
-	asm("mrc p15, 0, %0, c15, c12, 0\t\n" : : "r" (0x0007007));
+	asm("mcr p15, 0, %0, c15, c12, 0\t\n" : : "r" (0x00207007));
 	return 0;
 }
 
